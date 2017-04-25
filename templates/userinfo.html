@@ -1,21 +1,20 @@
-<!-- index.html (ch08www project) -->
+<!-- login.html (ch09www project) -->
 {% extends "base.html" %}
 {% block title %}分享日記{% endblock %}
 {% block content %}
 <div class='container'>
-{% for message in messages %}
-    <div class='alert alert-{{message.tags}}'>{{ message }}</div>
-{% endfor %}
 <div class='row'>
     <div class='col-md-12'>
         <div class='panel panel-default'>
             <div class='panel-heading' align=center>
-            <h3>我的私人日記</h3>
+                <h3>使用者資訊</h3>
+            </div>
     </div>
 </div>
-{% if username %}
-    歡迎：{{username}}
-{% endif %}
+<p>
+    您的姓名：{{ userinfo.username }}<br/>
+    電子郵件：{{ userinfo.email }}
+</p>
 </div>
 {% endblock %}
 

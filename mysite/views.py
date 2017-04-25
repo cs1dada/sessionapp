@@ -7,38 +7,63 @@ from django.http import HttpResponse, HttpResponseRedirect
 from mysite import models, forms
 
 def index(request, pid=None, del_pass=None):
+    if 'username' in request.session:
+        username = request.session['username']
+        useremail = request.session['useremail']
+
     template = get_template('index.html')
-    
-    posts = models.Post.objects.filter(enabled=True).order_by('-pub_time')[:30]
-    moods = models.Mood.objects.all()
-    try:
-        user_id = request.GET['user_id']
-        user_pass = request.GET['user_pass']
-        user_post = request.GET['user_post']
-        user_mood = request.GET['mood']
-    except:
-        user_id = None
-        message = '如要張貼訊息，則每一個欄位都要填...'
-
-    if del_pass and pid:
-        try:
-            post = models.Post.objects.get(id=pid)
-        except:
-            post = None
-        if post:
-            if post.del_pass == del_pass:
-                post.delete()
-                message = "資料刪除成功"
-            else:
-                message = "密碼錯誤"
-    elif user_id != None:
-        mood = models.Mood.objects.get(status=user_mood)
-        post = models.Post.objects.create(mood=mood, nickname=user_id, del_pass=user_pass, message=user_post)
-        post.save()
-        message='成功儲存！請記得你的編輯密碼[{}]!，訊息需經審查後才會顯示。'.format(user_pass)
-
     html = template.render(locals())
+    return HttpResponse(html)
 
+def login(request):
+    if request.method == 'POST':
+        #post method (write)
+        #check login_form is valid 
+        login_form = forms.LoginForm(request.POST)
+        if login_form.is_valid():
+            #grab account info from client
+            login_name = request.POST['username'].strip()
+            login_password = request.POST['password']
+            try:
+                # grab user data from database
+                user = models.User.objects.get(name=login_name)
+                # password verify
+                if user.password == login_password:
+                    # write session [username, useremail]
+                    request.session['username'] = user.name
+                    request.session['useremail'] = user.email
+                    return redirect('/')
+                else:
+                    message ="incorrect password"
+            except:
+                message = "no such member, cannot login now"
+        else:
+            message = 'plz check input content'
+    else:
+        #empty instance for read login_form
+        login_form = forms.LoginForm()
+        message = 'create personal account --> username and password'
+
+    template = get_template('login.html')
+
+    html = template.render(locals(), request)
+    response = HttpResponse(html)
+
+    return response
+
+def userinfo(request):
+    if 'username' in request.session:
+        username = request.session['username']
+    else:
+        return redirect('/login/')
+
+    try:
+        userinfo = models.User.objects.get(name=username)
+    except:
+        pass
+
+    template = get_template('userinfo.html')
+    html = template.render(locals())
     return HttpResponse(html)
 
 def listing(request):
