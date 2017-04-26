@@ -5,13 +5,27 @@ from django.template import Context, Template
 from django.template.loader import get_template
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import redirect
+# messages framework
 from django.contrib import messages
+#database
 from mysite import models, forms
+#auth
+from django.contrib.auth.models import User
+from django.contrib.auth import authenticate
+from django.contrib import auth
+from django.contrib.auth.decorators import login_required
 
 def index(request, pid=None, del_pass=None):
+    '''    
     if 'username' in request.session:
         username = request.session['username']
         useremail = request.session['useremail']
+    '''
+    #login?
+    if request.user.is_authenticated():
+        username = request.user.username
+
+    messages.get_messages(request)
 
     template = get_template('index.html')
     html = template.render(locals())
@@ -26,27 +40,24 @@ def login(request):
             #grab account info from client
             login_name = request.POST['username'].strip()
             login_password = request.POST['password']
-            try:
-                # grab user data from database
-                user = models.User.objects.get(name=login_name)
-                # password verify
-                if user.password == login_password:
-                    # write session [username, useremail]
-                    request.session['username'] = user.name
-                    request.session['useremail'] = user.email
-                    messages.add_message(request, messages.SUCCESS, ' success login ')
+            # password verify from User (not models.User)
+            user = authenticate(username=login_name, password=login_password)
+            if user is not None:
+                if user.is_active:
+                    #save userinfo into session
+                    auth.login(request, user)
+                    print "success"
+                    messages.add_message(request, messages.SUCCESS, 'success login')
                     return redirect('/')
                 else:
-                    messages.add_message(request, messages.WARNING, ' incorrect password ')
-            except:
-                messages.add_message(request, messages.WARNING, ' no such member, cannot login ')
+                    messages.add_message(request, messages.WARNING, 'account not active')
+            else:
+                messages.add_message(request, messages.WARNING, 'login fail')
         else:
-            messages.add_message(request, messages.INFO, ' plz check input content ')
+            messages.add_message(request, messages.INFO, 'plz check input content')
     else:
-        #empty instance for read login_form
+        #empty instance for login.htm read login_form
         login_form = forms.LoginForm()
-
-        message = 'create personal account --> username and password'
 
     template = get_template('login.html')
 
@@ -55,7 +66,45 @@ def login(request):
 
     return response
 
+''' raw auth method
+        login_form = forms.LoginForm()
+            try:
+                # grab user data from database
+                user = models.User.objects.get(name=login_name)
+                # password verify
+                if user.password == login_password:
+                    # write session [username, useremail]
+                    request.session['username'] = user.name
+                    request.session['useremail'] = user.email
+                    messages.add_message(request, messages.SUCCESS, 'success login')
+                    return redirect('/')
+                else:
+                    messages.add_message(request, messages.WARNING, 'incorrect password')
+            except:
+                messages.add_message(request, messages.WARNING, 'no such member, cannot login')
+        else:
+            messages.add_message(request, messages.INFO, 'plz check input content')
+    else:
+'''
+def logout(request):
+    auth.logout(request)
+    messages.add_message(request, messages.INFO, ' log out !!!')
+    return redirect('/')
+
+
+
+
+@login_required(login_url='/login/')
 def userinfo(request):
+    #login?
+    if request.user.is_authenticated():
+        username = request.user.username
+        try:
+            #get user info  from User (not models.User)
+            userinfo = User.objects.get(username=username)
+        except:
+            pass
+    '''
     if 'username' in request.session:
         username = request.session['username']
     else:
@@ -65,7 +114,7 @@ def userinfo(request):
         userinfo = models.User.objects.get(name=username)
     except:
         pass
-
+    '''
     template = get_template('userinfo.html')
     html = template.render(locals())
     return HttpResponse(html)
@@ -104,9 +153,7 @@ def posting(request):
     template = get_template('posting.html')
     moods = models.Mood.objects.all()
     message = '如要張貼訊息，則每一個欄位都要填...'
-    request_context = RequestContext(request)
-    request_context.push(locals())
-    html = template.render(request_context)
+    html = template.render(locals(), request)
 
     return HttpResponse(html)
 

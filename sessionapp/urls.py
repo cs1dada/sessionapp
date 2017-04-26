@@ -23,7 +23,7 @@ urlpatterns = [
     url(r'^userinfo/$', views.userinfo),
     url(r'^post/$', views.posting),
     url(r'^login/$', views.login),
-    #url(r'^logout/$', views.logout),
+    url(r'^logout/$', views.logout),
     url(r'^admin/', include(admin.site.urls)),
     url(r'^captcha/', include('captcha.urls')),
 ]
