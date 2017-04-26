@@ -23,8 +23,15 @@ def index(request, pid=None, del_pass=None):
     '''
     #login?
     if request.user.is_authenticated():
+        #get curent login user info  from auth.models User
         username = request.user.username
-
+        useremail = request.user.email
+        try:
+            user = models.User.objects.get(username=username)
+            diaries = models.Diary.objects.filter(user=user).order_by('-ddate')
+        except:
+            pass
+            
     messages.get_messages(request)
 
     template = get_template('index.html')
@@ -91,17 +98,16 @@ def logout(request):
     messages.add_message(request, messages.INFO, ' log out !!!')
     return redirect('/')
 
-
-
-
 @login_required(login_url='/login/')
 def userinfo(request):
     #login?
     if request.user.is_authenticated():
+        #get curent login user info  from auth.models User //request.user is User model object.
         username = request.user.username
         try:
             #get user info  from User (not models.User)
-            userinfo = User.objects.get(username=username)
+            user = User.objects.get(username=username)
+            userinfo = models.Profile.objects.get(user=user)
         except:
             pass
     '''
@@ -148,7 +154,34 @@ def post2db(request):
 
     return HttpResponse(html)
 
+@login_required(login_url='/login/')
 def posting(request):
+    #login?
+    if request.user.is_authenticated():
+        #get curent login user info  from auth.models User
+        username = request.user.username
+        useremail = request.user.email
+
+    messages.get_messages(request)
+
+    if request.method == 'POST':
+        #WRITE
+        #get login user info
+        user = User.objects.get(username = username)
+        #create instance Diary for specific user
+        diary = models.Diary(user=user)
+        #container [form DiaryForm]  save [diary instance(user post)]
+        post_form = forms.DiaryForm(request.POST, instance=diary)
+        if post_form.is_valid():
+            messages.add_message(request, messages.INFO, "DIARY is stored ")
+            post_form.save()
+            return HttpResponseRedirect('/')
+        else:
+            messages.add_message(request, messages.INFO, "EVERY column need to fill !!!")
+    else:
+        #READ
+        post_form = forms.DiaryForm()
+        messages.add_message(request, messages.INFO, "EVERY column need to fill !!!")
 
     template = get_template('posting.html')
     moods = models.Mood.objects.all()

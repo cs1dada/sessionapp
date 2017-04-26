@@ -11,10 +11,20 @@
             </div>
     </div>
 </div>
-<p>
-    您的姓名：{{ userinfo.username }}<br/>
-    電子郵件：{{ userinfo.email }}
-</p>
+<div class='row'>
+    <div class='col-md-12'>
+        <div class='panel panel-primary'>
+            <div class='panel-heading' align=center>
+                {{ userinfo.user.username | upper }}
+            </div>
+            <div class='panel panel-body'>
+                電子郵件：{{ userinfo.user.email }}<br/>
+                身高：{{ userinfo.height }} cm<br/>
+                性別：{{ userinfo.male | yesno:"男生,女生"}}
+            </div>
+        </div>
+    </div>
+</div>
 </div>
 {% endblock %}
 
