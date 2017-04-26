@@ -4,6 +4,8 @@ from django.template import RequestContext
 from django.template import Context, Template
 from django.template.loader import get_template
 from django.http import HttpResponse, HttpResponseRedirect
+from django.shortcuts import redirect
+from django.contrib import messages
 from mysite import models, forms
 
 def index(request, pid=None, del_pass=None):
@@ -32,16 +34,18 @@ def login(request):
                     # write session [username, useremail]
                     request.session['username'] = user.name
                     request.session['useremail'] = user.email
+                    messages.add_message(request, messages.SUCCESS, ' success login ')
                     return redirect('/')
                 else:
-                    message ="incorrect password"
+                    messages.add_message(request, messages.WARNING, ' incorrect password ')
             except:
-                message = "no such member, cannot login now"
+                messages.add_message(request, messages.WARNING, ' no such member, cannot login ')
         else:
-            message = 'plz check input content'
+            messages.add_message(request, messages.INFO, ' plz check input content ')
     else:
         #empty instance for read login_form
         login_form = forms.LoginForm()
+
         message = 'create personal account --> username and password'
 
     template = get_template('login.html')

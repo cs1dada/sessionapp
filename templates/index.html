@@ -3,9 +3,11 @@
 {% block title %}分享日記{% endblock %}
 {% block content %}
 <div class='container'>
+
 {% for message in messages %}
     <div class='alert alert-{{message.tags}}'>{{ message }}</div>
 {% endfor %}
+
 <div class='row'>
     <div class='col-md-12'>
         <div class='panel panel-default'>
