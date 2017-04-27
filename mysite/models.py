@@ -29,7 +29,7 @@ class Diary(models.Model):
 
     def __unicode__(self):
         return "{}({})".format(self.ddate, self.user)
-
+"""
 # raw auth
 class User(models.Model):
     name = models.CharField(max_length=20, null=False)
@@ -55,3 +55,4 @@ class Post(models.Model):
     enabled = models.BooleanField(default=False)
     def __unicode__(self):
         return self.message
+"""

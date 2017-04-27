@@ -27,11 +27,11 @@ def index(request, pid=None, del_pass=None):
         username = request.user.username
         useremail = request.user.email
         try:
-            user = models.User.objects.get(username=username)
+            user = User.objects.get(username=username)
             diaries = models.Diary.objects.filter(user=user).order_by('-ddate')
         except:
             pass
-            
+
     messages.get_messages(request)
 
     template = get_template('index.html')
@@ -184,8 +184,6 @@ def posting(request):
         messages.add_message(request, messages.INFO, "EVERY column need to fill !!!")
 
     template = get_template('posting.html')
-    moods = models.Mood.objects.all()
-    message = '如要張貼訊息，則每一個欄位都要填...'
     html = template.render(locals(), request)
 
     return HttpResponse(html)

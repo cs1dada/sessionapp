@@ -2,22 +2,26 @@
 from django import forms
 from mysite import models
 from captcha.fields import CaptchaField
+from django.forms import ModelForm
+from django.contrib.auth.models import User
 
 class LoginForm(forms.Form):
     username = forms.CharField(label='姓名', max_length=10)
     password = forms.CharField(label='密碼', widget=forms.PasswordInput())
-    
-class DateInput(forms.DateInput):
+
+class DateInput2(forms.DateInput):
     input_type = 'date'
 
-class DiaryForm(forms.ModelForm):
+class DiaryForm(ModelForm):
 
     class Meta:
         model = models.Diary
         fields = ['budget', 'weight', 'note', 'ddate']
+        """
         widgets = {
-            'ddate': DateInput(),
+            'ddate': forms.DateInput(input_formats='%m/%d/%Y')
         }
+        """
 
     def __init__(self, *args, **kwargs):
         super(DiaryForm, self).__init__(*args, **kwargs)
@@ -25,7 +29,7 @@ class DiaryForm(forms.ModelForm):
         self.fields['weight'].label = '今日體重(KG)'
         self.fields['note'].label = '心情留言'
         self.fields['ddate'].label = '日期'
-
+"""
 class ContactForm(forms.Form):
     CITY = [
         ['TP', 'Taipei'],
@@ -54,3 +58,4 @@ class PostForm(forms.ModelForm):
         self.fields['message'].label = '心情留言'
         self.fields['del_pass'].label = '設定密碼'
         self.fields['captcha'].label = '確定你不是機器人'
+"""
