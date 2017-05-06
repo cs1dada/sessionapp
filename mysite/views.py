@@ -53,7 +53,7 @@ def login(request):
                 if user.is_active:
                     #save userinfo into session
                     auth.login(request, user)
-                    print "success"
+                    print ("success")
                     messages.add_message(request, messages.SUCCESS, 'success login')
                     return redirect('/')
                 else:
